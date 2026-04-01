@@ -1,36 +1,79 @@
-# macOS
+# =========================
+# OS FILES
+# =========================
 .DS_Store
-
-# Windows
 Thumbs.db
 desktop.ini
 
-# Python
+# =========================
+# PYTHON / BLENDER ADD-ON
+# =========================
 __pycache__/
 *.py[cod]
+*.pyo
 
-# Blender packaged zips
+# Blender packaged builds
 *.zip
 
-# Flutter / Dart
+# =========================
+# FLUTTER / DART
+# =========================
 mobile_app/.dart_tool/
 mobile_app/.packages
 mobile_app/.pub/
 mobile_app/build/
 
-# Flutter generated plugin files
+# Flutter plugin metadata
 mobile_app/.flutter-plugins
 mobile_app/.flutter-plugins-dependencies
 
-# iOS generated
+# =========================
+# iOS (Flutter)
+# =========================
 mobile_app/ios/Pods/
 mobile_app/ios/.symlinks/
 mobile_app/ios/Flutter/ephemeral/
 
-# Android / Gradle generated
+# Generated Flutter iOS configs (DO NOT commit)
+mobile_app/ios/Flutter/Generated.xcconfig
+mobile_app/ios/Flutter/flutter_export_environment.sh
+
+# Xcode user data
+mobile_app/ios/Runner.xcworkspace/xcuserdata/
+mobile_app/ios/Runner.xcodeproj/xcuserdata/
+
+# =========================
+# macOS (Flutter)
+# =========================
+mobile_app/macos/Pods/
+mobile_app/macos/Flutter/ephemeral/
+
+# =========================
+# ANDROID / GRADLE
+# =========================
 mobile_app/android/.gradle/
 mobile_app/android/app/build/
+mobile_app/android/local.properties
 
-# IDE
+# =========================
+# IDE / EDITORS
+# =========================
 .vscode/
 .idea/
+*.iml
+
+# =========================
+# LOGS / TEMP FILES
+# =========================
+*.log
+*.tmp
+*.temp
+
+# =========================
+# OPTIONAL (uncomment if needed)
+# =========================
+# Coverage reports
+# coverage/
+
+# Build outputs (if you add later)
+# dist/

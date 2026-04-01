@@ -68,6 +68,6 @@
 	</array>
 
 	<key>NSCameraUsageDescription</key>
-	<string>This app uses the camera for AR world tracking to control Blender.</string>
+	<string>This app uses the camera for AR tracking and to scan QR codes to connect to Blender.</string>
 </dict>
 </plist>
