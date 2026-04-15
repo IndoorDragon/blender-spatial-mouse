@@ -68,6 +68,10 @@ class _ControlPageState extends State<ControlPage> {
     return value.abs() < deadzone ? 0.0 : value;
   }
 
+  Quat _applyRotationDeadzone(Quat q, double deadzoneRadians) {
+    return q.angleRadians() < deadzoneRadians ? Quat.identity : q;
+  }
+
   void _onPose(ArPose pose) {
     _latestPose = pose;
 
@@ -78,25 +82,23 @@ class _ControlPageState extends State<ControlPage> {
       );
 
       final rawT = delta.translationLocal;
-      final rawEuler = delta.rotationDelta.toEulerXYZ();
+      final rawQ = delta.rotationDelta.canonicalized();
 
       final tx = _applyDeadzone(rawT.x, 0.01);
       final ty = _applyDeadzone(rawT.y, 0.01);
       final tz = _applyDeadzone(rawT.z, 0.01);
 
-      final rx = _applyDeadzone(rawEuler.x, 0.015);
-      final ry = _applyDeadzone(rawEuler.y, 0.015);
-      final rz = _applyDeadzone(rawEuler.z, 0.015);
+      final q = _applyRotationDeadzone(rawQ, 0.015);
 
       widget.client.send(controlInputMessage(
         active: true,
         tx: tx,
         ty: ty,
         tz: tz,
-        qx: rx,
-        qy: ry,
-        qz: rz,
-        qw: 1.0,
+        qx: q.x,
+        qy: q.y,
+        qz: q.z,
+        qw: q.w,
         tracking: pose.tracking,
       ));
     }

@@ -24,16 +24,24 @@ class Quat {
 
   const Quat(this.x, this.y, this.z, this.w);
 
+  static const identity = Quat(0.0, 0.0, 0.0, 1.0);
+
   Quat normalized() {
     final mag = math.sqrt(x * x + y * y + z * z + w * w);
-    if (mag == 0) return const Quat(0, 0, 0, 1);
+    if (mag == 0) return identity;
     return Quat(x / mag, y / mag, z / mag, w / mag);
   }
 
   Quat inverse() {
     final n = x * x + y * y + z * z + w * w;
-    if (n == 0) return const Quat(0, 0, 0, 1);
+    if (n == 0) return identity;
     return Quat(-x / n, -y / n, -z / n, w / n);
+  }
+
+  Quat negate() => Quat(-x, -y, -z, -w);
+
+  double dot(Quat other) {
+    return x * other.x + y * other.y + z * other.z + w * other.w;
   }
 
   Quat multiply(Quat b) {
@@ -52,27 +60,20 @@ class Quat {
     return Vec3(result.x, result.y, result.z);
   }
 
-  // Returns Euler angles in radians:
-  // x = pitch
-  // y = roll
-  // z = yaw
-  Vec3 toEulerXYZ() {
+  Quat canonicalized() {
     final q = normalized();
+    return q.w < 0.0 ? q.negate() : q;
+  }
 
-    final sinrCosp = 2.0 * (q.w * q.x + q.y * q.z);
-    final cosrCosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
-    final pitch = math.atan2(sinrCosp, cosrCosp);
+  Quat shortestArcFrom(Quat reference) {
+    final q = normalized();
+    return reference.dot(q) < 0.0 ? q.negate() : q;
+  }
 
-    final sinp = 2.0 * (q.w * q.y - q.z * q.x);
-    final roll = sinp.abs() >= 1.0
-        ? (sinp >= 0 ? math.pi / 2 : -math.pi / 2)
-        : math.asin(sinp);
-
-    final sinyCosp = 2.0 * (q.w * q.z + q.x * q.y);
-    final cosyCosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
-    final yaw = math.atan2(sinyCosp, cosyCosp);
-
-    return Vec3(pitch, roll, yaw);
+  double angleRadians() {
+    final q = canonicalized();
+    final clampedW = q.w.clamp(-1.0, 1.0);
+    return 2.0 * math.acos(clampedW);
   }
 
   @override
@@ -90,7 +91,8 @@ class PoseDelta {
 }
 
 Quat quatFromPose(ArPose p) => Quat(p.qx, p.qy, p.qz, p.qw).normalized();
-Quat arQuatFromPose(ArPose p) => Quat(p.arQx, p.arQy, p.arQz, p.arQw).normalized();
+Quat arQuatFromPose(ArPose p) =>
+    Quat(p.arQx, p.arQy, p.arQz, p.arQw).normalized();
 Vec3 vecFromPose(ArPose p) => Vec3(p.px, p.py, p.pz);
 
 PoseDelta computeNeutralRelativeDelta({
@@ -105,11 +107,14 @@ PoseDelta computeNeutralRelativeDelta({
   final pNeutral = vecFromPose(neutral);
   final pCurrent = vecFromPose(current);
 
-  // Rotation delta still comes from Core Motion because it gave better rotational behavior.
-  final qDelta = qNeutralMotion.inverse().multiply(qCurrentMotion).normalized();
+  // Use Core Motion for rotation delta, but keep it as a quaternion all the way
+  // through so we avoid Euler discontinuities near 180 degrees.
+  final qDelta = qNeutralMotion
+      .inverse()
+      .multiply(qCurrentMotion)
+      .canonicalized();
 
-  // Translation MUST be converted using the SAME coordinate frame that produced ARKit's
-  // world-space camera positions. Otherwise forward/back/left/right can look random.
+  // Translation remains relative to the neutral AR frame.
   final worldDelta = pCurrent - pNeutral;
   final localDelta = qNeutralAr.inverse().rotateVector(worldDelta);
 

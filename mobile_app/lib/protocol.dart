@@ -4,7 +4,7 @@ String helloMessage() {
   return jsonEncode({
     "type": "hello",
     "app": "blender_spatial_mouse",
-    "version": 1,
+    "version": 2,
   }) + "\n";
 }
 
@@ -36,6 +36,7 @@ String controlInputMessage({
       "z": tz,
     },
     "rotation": {
+      "mode": "quaternion_delta",
       "qx": qx,
       "qy": qy,
       "qz": qz,
