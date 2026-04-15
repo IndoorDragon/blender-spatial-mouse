@@ -1,4 +1,4 @@
-package com.example.phone_spatial_mouse
+package com.example.mobile_app
 
 import android.content.Context
 import android.hardware.Sensor
